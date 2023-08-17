@@ -11,10 +11,8 @@ const preprocessString = (str: string) => {
 
 const issueIdRegEx = /([a-zA-Z0-9]+-[0-9]+)/g;
 
-const findIssueKeyIn = async (searchStr: string) => {
+export const findIssueKeyIn = async (searchStr: string) => {
   const match = searchStr.match(issueIdRegEx);
-
-  console.log(`Searching in string: \n ${searchStr}`);
 
   if (!match) {
     console.log(`String does not contain issueKeys`);
@@ -22,10 +20,12 @@ const findIssueKeyIn = async (searchStr: string) => {
     return [];
   }
 
+  const uniqueEntries = _.uniq(match);
+
   const issueKeys: JiraApi.JsonResponse[] = [];
 
   // Validate that the issue exists
-  for (const issueKey of match) {
+  for (const issueKey of uniqueEntries) {
     let issue;
     try {
       issue = await jiraClient.getIssue(issueKey);
@@ -39,9 +39,7 @@ const findIssueKeyIn = async (searchStr: string) => {
     }
   }
 
-  const uniqueEntries = _.uniq(issueKeys);
-
-  return uniqueEntries;
+  return issueKeys;
 };
 
 interface getIssueKeyProps {

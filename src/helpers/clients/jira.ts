@@ -1,6 +1,6 @@
 import JiraApi from "jira-client";
 
-var jiraClient = new JiraApi({
+const jiraClient = new JiraApi({
   protocol: "https",
   host: "adverity.atlassian.net",
   strictSSL: true,

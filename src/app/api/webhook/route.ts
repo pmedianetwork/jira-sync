@@ -1,5 +1,5 @@
 import onPullRequestApproval from "@/helpers/onPullRequestApproval";
-import onPullRequestReviewStarted from "@/helpers/onPullRequestReviewStarted";
+import onRelease from "@/helpers/onRelease";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request, res: Response) {
@@ -20,22 +20,16 @@ export async function POST(req: Request, res: Response) {
         issueKeys: await onPullRequestApproval(githubEvent),
       });
 
-    /**
-     * Note: Ideally, we would like this action to happen before the PR
-     * review comment is submitted. However, as of now, GitHub does not
-     * provide a way to do this. The next best thing is to do it after
-     * the comment is submitted.
-     */
-    case "pull_request_review_comment":
-      if (githubEvent.action !== "created") {
+    case "release":
+      if (githubEvent.action !== "published") {
         return NextResponse.json({
-          message: "Not a pull request review comment event",
+          message: "Not a valid release event",
         });
       }
 
       return NextResponse.json({
         message: "Success",
-        issueKeys: await onPullRequestReviewStarted(githubEvent),
+        issueKeys: await onRelease(githubEvent),
       });
     default:
       return NextResponse.json({
