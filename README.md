@@ -1,34 +1,82 @@
+# Jira Sync Webhook API
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
 
-First, run the development server:
+First, ensure you have the right environment variables set up. You can copy the `.env.example` file to `.env.local` and fill in the values.
+
+### Docker and environment variables
+
+In case you are using Docker, the environment variables will be picked up from your `.env` file. So, in this case, the same rules apply as without the docker.
+
+Then, install the dependencies:
 
 ```bash
-npm run dev
-# or
 yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+You can interact with the API using the /api/webhook endpoint.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This API route is designed to handle GitHub webhook events, specifically for pull request reviews and releases. Depending on the type of GitHub event received, it will trigger different functions (onPullRequestAction or onReleaseAction) to process the event and return a response.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+The specific Github events it cares about are:
 
-## Learn More
+- `pull_request_review` events
+- `release` events
 
-To learn more about Next.js, take a look at the following resources:
+### Request Headers
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `x-github-event`: Specifies the type of GitHub event. This route specifically handles `pull_request_review` and `release` events.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### Request Body
 
-## Deploy on Vercel
+The request body should contain the raw payload of the GitHub event.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Transitions on `pull_request_review` event
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This event is handled in `onPullRequestAction` function which is responsible for taking care of transitions of JIRA issues based on actions taken on a GitHub pull request. Here are the transitions that the function manages:
+
+### Start of Review Process:
+
+**Trigger**: The function assumes that the first comment on a pull request signifies the start of the review process.
+**Condition**: The JIRA issue has no approvers.
+**Actions**:
+
+- If the JIRA issue is in the "_Ready for Code Review_" status, transition it to the "_In Code Review_" status.
+- Add a comment to the JIRA issue indicating that the review has started.
+- JIRA Comment Format: _[Pull Request] Review started by [GitHub Reviewer's Username]_
+
+### First PR Approval:
+
+**Trigger**: The pull request receives its first approval.
+**Condition**: The JIRA issue is in the "_Ready for Code Review_" status.
+**Actions**:
+
+- Transition the JIRA issue to the "_In Code Review_" status.
+- Add a comment to the JIRA issue indicating the first approval.
+- JIRA Comment Format: _[Pull Request] Review started by [GitHub Reviewer's Username]_
+
+### Second PR Approval:
+
+**Trigger**: The pull request receives its second approval.
+**Condition**: The function assumes that by this point, the JIRA issue is already in the "_In Code Review_" status.
+**Actions**:
+
+- Add a comment to the JIRA issue indicating the second approval.
+- Transition the JIRA issue to the "_Ready for QA_" status.
+- JIRA Comment Format: _[Pull request] Fully approved by [Approver 1] & [Approver 2]_
+
+## Transitions on `release` event
+
+The `onReleaseAction` function manages transitions of JIRA issues based on the release action in a GitHub repository. Here are the transitions that the function manages:
+
+### Release Process:
+
+**Trigger**: A release action on GitHub.
+**Condition**: The release body contains JIRA issue keys.
+**Actions**:
+
+- Transition the JIRA issue to the "_Done/Released_" status.
+- Add a comment to the JIRA issue indicating the release version.
+- JIRA Comment Format: _Released in version: [GitHub Release Version]_

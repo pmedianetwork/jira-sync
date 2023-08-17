@@ -4,7 +4,7 @@ import { getIssueKey } from "./getIssueKey";
 import { allPRApprovers, getCommitsFromEvent } from "./utils";
 import _ from "lodash";
 
-async function onPullRequestApproval(githubEvent: any) {
+async function onPullRequestAction(githubEvent: any) {
   const commits = await getCommitsFromEvent({
     owner: githubEvent.repository.owner.login,
     repo: githubEvent.repository.name,
@@ -28,7 +28,12 @@ async function onPullRequestApproval(githubEvent: any) {
   const updatedIssues = [];
 
   for (const issue of issues) {
-    // If the issue is in "In Development" status, transition to "In Code Review"
+    /**
+     * At this point, the issue has no approvers but we assume that the first comment
+     * signifies the start of the review process.
+     *
+     * In this case, we want to transition the issue to "In Code Review" status.
+     **/
     if (allApprovers.length === 0) {
       if (issue.fields.status.id === STATUS_IDS.READY_FOR_CODE_REVIEW) {
         continue;
@@ -62,6 +67,11 @@ async function onPullRequestApproval(githubEvent: any) {
       });
     }
 
+    /**
+     * Once we get 1st approval, we want to notify the JIRA by commenting it and
+     * in case the issue was in "Ready for code review" status, we transition it to
+     * "In Code Review" status.
+     **/
     if (allApprovers.length === 1) {
       // PR approved by 1 person, notify JIRA
       const comment = `[Pull Request] First approval by ${allApprovers.join(
@@ -96,6 +106,11 @@ async function onPullRequestApproval(githubEvent: any) {
       updatedIssues.push(issue);
     }
 
+    /**
+     * Once we get 2nd approval, we know that issue is already in "In Code Review"
+     * status so we notify the JIRA by commenting that there was a second approver
+     * and transition it to "Ready for QA"
+     **/
     if (allApprovers.length === 2) {
       // PR approved by 2 people, notify JIRA
       const comment = `[Pull request] Fully approved by ${allApprovers.join(
@@ -131,4 +146,4 @@ async function onPullRequestApproval(githubEvent: any) {
   return updatedIssues;
 }
 
-export default onPullRequestApproval;
+export default onPullRequestAction;

@@ -3,7 +3,7 @@ import jiraClient from "./clients/jira";
 import { TRANSITION_IDS } from "./config";
 import { findIssueKeyIn } from "./getIssueKey";
 
-async function onRelease(githubEvent: any) {
+async function onReleaseAction(githubEvent: any) {
   const issues = await findIssueKeyIn(githubEvent.release.body);
 
   const releaseVersion = githubEvent.release.tag_name;
@@ -47,4 +47,4 @@ async function onRelease(githubEvent: any) {
   return updatedIssues;
 }
 
-export default onRelease;
+export default onReleaseAction;

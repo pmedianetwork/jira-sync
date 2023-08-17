@@ -1,5 +1,5 @@
-import onPullRequestApproval from "@/helpers/onPullRequestApproval";
-import onRelease from "@/helpers/onRelease";
+import onPullRequestAction from "@/helpers/onPullRequestAction";
+import onReleaseAction from "@/helpers/onReleaseAction";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request, res: Response) {
@@ -17,7 +17,7 @@ export async function POST(req: Request, res: Response) {
 
       return NextResponse.json({
         message: "Success",
-        issueKeys: await onPullRequestApproval(githubEvent),
+        issueKeys: await onPullRequestAction(githubEvent),
       });
 
     case "release":
@@ -29,7 +29,7 @@ export async function POST(req: Request, res: Response) {
 
       return NextResponse.json({
         message: "Success",
-        issueKeys: await onRelease(githubEvent),
+        issueKeys: await onReleaseAction(githubEvent),
       });
     default:
       return NextResponse.json({
