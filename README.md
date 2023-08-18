@@ -13,7 +13,7 @@ In case you are using Docker, the environment variables will be picked up from y
 Then, install the dependencies:
 
 ```bash
-yarn dev
+yarn dev bla
 ```
 
 You can interact with the API using the /api/webhook endpoint.
