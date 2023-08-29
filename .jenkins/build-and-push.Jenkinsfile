@@ -2,6 +2,7 @@ String APP_NAME = 'jira-sync'
 String IMAGE_REPO = 'jira-sync-docker/'
 String REPOSITORY = 'pmedianetwork/jira-sync'
 String DOCKERFILE = 'Dockerfile'
+String JFROG_SERVER = 'jfrog-registry.internal.adverity.zone'
 
 pipeline {
     agent none
@@ -23,7 +24,7 @@ pipeline {
                     script {
                         def head = shout("git rev-parse HEAD")
                         def prId =  env.CHANGE_ID ?: shout("git ls-remote origin \"pull/*/head\" | grep -F ${head} | cut -d\"/\" -f3")
-                        def imageName = generateImageTag(appName: APP_NAME, targetRepo: IMAGE_REPO, source: REF, changeId: prId)
+                        def imageName = generateImageTag(appName: APP_NAME, targetRepo: IMAGE_REPO, source: REF, changeId: prId, jfrogServer: JFROG_SERVER )
                         withCommitStatus(
                             repository: REPOSITORY,
                             commitish: head,
