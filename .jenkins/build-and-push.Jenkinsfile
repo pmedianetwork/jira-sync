@@ -1,5 +1,5 @@
 String APP_NAME = 'jira-sync'
-String IMAGE_REPO = 'jira-sync'
+String IMAGE_REPO = 'jira-sync-docker/'
 String REPOSITORY = 'pmedianetwork/jira-sync'
 String DOCKERFILE = 'Dockerfile'
 
