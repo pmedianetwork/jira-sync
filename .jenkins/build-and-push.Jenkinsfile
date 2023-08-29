@@ -1,5 +1,5 @@
 String APP_NAME = 'jira-sync'
-String IMAGE_REPO = 'jira-sync-docker'
+String IMAGE_REPO = 'jira-sync'
 String REPOSITORY = 'pmedianetwork/jira-sync'
 String DOCKERFILE = 'Dockerfile'
 String JFROG_SERVER = 'jfrog-registry.internal.adverity.zone'
