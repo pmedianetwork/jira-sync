@@ -5,7 +5,23 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request, res: Response) {
   const ghEventType = req.headers.get("x-github-event");
 
+  if (!ghEventType) {
+    return NextResponse.json({
+      message: "Not a valid event",
+    });
+  }
+
   const githubEvent = await req.json();
+
+  if (!githubEvent.installation) {
+    return NextResponse.json({
+      message: "Not a valid event",
+    });
+  }
+
+  // We store the installation ID in a global variable so that we
+  // can use it in other functions.
+  global.installationId = githubEvent.installation.id;
 
   switch (ghEventType) {
     case "pull_request_review":
@@ -31,6 +47,7 @@ export async function POST(req: Request, res: Response) {
         message: "Success",
         issueKeys: await onReleaseAction(githubEvent),
       });
+
     default:
       return NextResponse.json({
         message: "Not a valid event",
