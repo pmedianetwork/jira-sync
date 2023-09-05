@@ -2,7 +2,7 @@ import githubClient from "./clients/github";
 import _ from "lodash";
 
 export const allPRApprovers = async (github_event: any) => {
-  const { data } = await githubClient.request(
+  const { data } = await githubClient(global.installationId).request(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
     {
       owner: github_event.repository.owner.login,
@@ -35,7 +35,7 @@ export const getCommitsFromEvent = async ({
   repo,
   pull_number,
 }: getCommitsFromEventProps) => {
-  const { data } = await githubClient.request(
+  const { data } = await githubClient(global.installationId).request(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}/commits",
     {
       owner,
@@ -57,7 +57,7 @@ export const getPullRequest = async (
   owner: string,
   repo: string
 ) => {
-  const { data } = await githubClient.request(
+  const { data } = await githubClient(global.installationId).request(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}",
     {
       owner,
